@@ -36,5 +36,6 @@ All nine pass as of 2026-11-12 (re-freeze #12).
 
 - The gate (`deploy/http_gate.py`) is the only public listener. Both consoles stay on loopback.
 - Default (no code): the demo console replays recorded real answers (REPLAY badge) and runs the labelled stand-in Relay Lab. No model key is present.
-- With `GROQ_API_KEY` set in the host environment, a second console runs the real model on loopback. It is reachable only with a valid access code (`https://<host>/?code=...`, which sets an HttpOnly cookie). Model-calling requests on the live route are capped per-IP and globally per UTC day (persisted to disk).
+- With `GROQ_API_KEY` set in the host environment, a second console runs the real model on loopback. It is reachable only after submitting the access code via POST to `/live-login` (never in a URL), which sets an HttpOnly, Secure, SameSite=Lax cookie. Model-calling requests on the live route are capped per-IP and globally per UTC day.
+- Quota-cap limitation: counters persist to a local JSON file (survives process restarts) but the host's ephemeral disk is wiped on service restart/redeploy, which resets them. The global cap is intentionally small so a reset cycle is bounded; the provider key's own daily limit is the ultimate backstop.
 - Build: `cat payload.b64.* | base64 -d | tar xz && pip install -r requirements.txt`  Start: `bash render_start.sh`
